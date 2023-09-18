@@ -14,6 +14,8 @@
 #include "telnetgrbl.h"
 #include "BluetoothSerial.h"
 #include "bt.h"
+#include <sstream>
+#include <iomanip>
 
 // we can also get messages: They are enclosed between [....] ; they are currently discarded but stored in the log. 
 // used to decode the status and position sent by GRBL
@@ -559,13 +561,18 @@ void sendFromString(){
             //Serial2.print(G30SavedY) ;
             break;
          case 'Z' : // Put some char in the flow
+         {
             savedWposXYZA[2] = preferences.getFloat("wposZ" , 0 ) ; // if wposZ does not exist in preferences, the function returns 0
             char floatToString[20] ;
-            gcvt(savedWposXYZA[2], 3, floatToString); // convert float to string
+            std::stringstream ss;
+            ss << std::fixed << std::setprecision(3) << savedWposXYZA[2];
+            std::string s = ss.str();
+            memcpy(floatToString, s.c_str(), s.size() + 1);
             toGrbl(floatToString) ;
             //Serial2.print(floatToString) ;
             //Serial.print( "wpos Z is retrieved with value = ") ; Serial.println( floatToString ) ; // to debug
             break;
+         }
          case 'M' : // Restore modal G20/G21/G90/G91
             toGrbl(modalAbsRel) ;
             //Serial2.print( modalAbsRel) ;
